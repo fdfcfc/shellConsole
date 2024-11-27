@@ -1,0 +1,26 @@
+#console-toolbar {
+	display: inline-block;
+	background-image: url("../img/console.svg");
+	background-size: 100%;
+	opacity: 0.65;
+}
+
+#shell-content {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+	height: 100%;
+}
+
+#shell-input {
+	width: 100%;
+	height: 10%;
+	border: none;
+	box-sizing: border-box;
+	outline: none;
+}
+
+#shell-output {
+	overflow: scroll;
+	height: 90%;
+}
