@@ -1,42 +1,72 @@
-/**
- * This is an optional node extension that is available only in desktop builds. This code will be run in node. You can
- * bring in any third party node modules using package.json in folder `node/package.json`
- *
- * nb: Please note that you should not package `node_modules` folder when you care creating the extension zip file.
- * Zip `node/package-lock.json`, but not node modules.
- *
- * To communicate between this node file and the phoenix extension use: NodeConnector-API -
- * See. https://docs.phcode.dev/api/API-Reference/NodeConnector for detailed docs.
- **/
-console.log("hello world node extension");
+const NODE_CONNECTOR_ID = "ext_main_shell";
+const extnNodeConnector = global.createNodeConnector(NODE_CONNECTOR_ID, exports);
 
-const sharp = require("sharp");
+const { spawn } = require("child_process");
+const path = require("path");
+const fs = require("fs");
 
-const extnNodeConnector = global.createNodeConnector(
-    "your-extension-id-1",
-    exports
-);
+let currentDirectory = process.cwd();
 
-async function echoTest(name) {
-    return "hello from node " + name;
-}
-
-async function convertToGreyScale(imageName, imageArrayBuffer) {
-    try {
-        // Convert the image buffer to grayscale using sharp
-        const outputBuffer = await sharp(imageArrayBuffer)
-            .grayscale() // Convert to grayscale
-            .toBuffer(); // Convert to buffer
-
-        // Return the output buffer
-        return {
-            success: true,
-            buffer: outputBuffer // a single binary array buffer can be transmitted, it should use key buffer
-        };
-    } catch (error) {
-        throw new Error("Error converting image to black and white:", error);
+function execute(command) {
+  return new Promise((resolve, reject) => {
+    if (command.input.startsWith("cd")) {
+      const targetDir = command.input.slice(3).trim();
+      if (targetDir) {
+        const newDir = path.resolve(currentDirectory, targetDir);
+        fs.access(newDir, fs.constants.F_OK, (err) => {
+          if (err) {
+            reject(new Error(`Invalid directory: ${targetDir}`));
+          } else {
+            currentDirectory = newDir;
+            resolve(
+              JSON.stringify({
+                msg: `Changed directory to: ${currentDirectory}`,
+                dir: currentDirectory
+              })
+            );
+          }
+        });
+      } else {
+        currentDirectory = process.cwd();
+        resolve(
+          JSON.stringify({
+            msg: `Changed directory to root: ${currentDirectory}`,
+            dir: currentDirectory
+          })
+        );
+      }
+      return;
     }
+
+    const shellCommand = process.platform === "win32" ? "powershell.exe" : "bash";
+    const args = process.platform === "win32" ? ["-NoProfile", "-Command", command.input] : ["-c", command.input];
+
+    const child = spawn(shellCommand, args, { cwd: currentDirectory, shell: true });
+
+    let output = "";
+    let error = "";
+
+    child.stdout.on("data", (data) => {
+      output += data.toString();
+    });
+
+    child.stderr.on("data", (data) => {
+      error += data.toString();
+    });
+
+    child.on("close", (code) => {
+      if (code !== 0 || error) {
+        reject(error.trim());
+      } else {
+        resolve(
+          JSON.stringify({
+            msg: output.trim(),
+            dir: currentDirectory
+          })
+        );
+      }
+    });
+  });
 }
 
-exports.echoTest = echoTest;
-exports.convertToGreyScale = convertToGreyScale;
+exports.execute = execute;
