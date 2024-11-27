@@ -1,17 +1,20 @@
 {
-    "title": "Name of the extension",
-    "name": "github-<owner>-<repo>",
-    "description": "A sample extension.",
+    "title": "Shell Console",
+    "name": "phoenix-shell-console",
+    "description": "An extension to add a terminal-like shell in Phoenix IDE.",
     "version": "0.0.1",
     "license": "MIT",
-    "author": "your name (https://github.com/<your github id>)",
-    "homepage": "<project web page url or this github repo url if no website available>",
+    "author": "fdfcfc",
+    "homepage": "https://github.com/fdfcfc/shellConsole",
     "engines": {
         "brackets": ">=2.0.0"
     },
-    "categories": "demo",
+    "categories": "console",
     "keywords": [
-        "phcode", "extension", "demo"
+        "phoenix",
+        "shell",
+        "console",
+        "terminal"
     ],
     "files": [
         "main.js"
@@ -22,4 +25,3 @@
         "npmInstall": "node/"
     }
 }
-
