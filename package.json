@@ -2,7 +2,7 @@
     "title": "Shell Console",
     "name": "phoenix-shell-console",
     "description": "An extension to add a terminal-like shell in Phoenix IDE.",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "license": "MIT",
     "author": "fdfcfc",
     "homepage": "https://github.com/fdfcfc/shellConsole",
